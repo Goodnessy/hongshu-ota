@@ -1,0 +1,39 @@
+name: Verify public stable APK and OTA
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  anonymous_verification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Verify anonymous feed, full download, hash and Android signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --retry 4 --retry-delay 5 --fail --location --max-time 120 https://raw.githubusercontent.com/Goodnessy/hongshu-ota/main/stable.json -o stable.json
+          python3 - <<'PY'
+          import json
+          m=json.load(open('stable.json'))
+          assert m['versionCode']==100 and m['versionName']=='1.0.0'
+          assert m['packageName']=='com.hongshu.assistant.local'
+          assert m['apkUrl']=='https://github.com/Goodnessy/hongshu-ota/releases/download/v1.0.0/hongshu-v1.0.0.apk'
+          print(json.dumps(m,ensure_ascii=False,indent=2))
+          PY
+          curl --retry 4 --retry-delay 5 --fail --location --max-time 180 https://github.com/Goodnessy/hongshu-ota/releases/download/v1.0.0/hongshu-v1.0.0.apk -o hongshu.apk
+          python3 - <<'PY'
+          import json,hashlib,pathlib,zipfile
+          m=json.load(open('stable.json')); p=pathlib.Path('hongshu.apk')
+          sha=hashlib.sha256(p.read_bytes()).hexdigest()
+          assert sha==m['sha256']=='9544889ee13349431a809b71ec9622181733c93ebaf332b05edb5a68dc651fdf'
+          assert p.stat().st_size==m['sizeBytes']
+          with zipfile.ZipFile(p) as z: assert z.testzip() is None
+          print('Anonymous full APK download, ZIP, size and SHA256 verified:',sha)
+          PY
+          SIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)"
+          AAPT="$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -n 1)"
+          "$SIGNER" verify --verbose --print-certs hongshu.apk | tee certs.txt
+          grep -qiF '089f5a037a6ff0a82560f55992ebaa14dd0e541f3d12bb0476e500f48e82f2a3' certs.txt
+          "$AAPT" dump badging hongshu.apk > badging.txt
+          grep -F "name='com.hongshu.assistant.local' versionCode='100' versionName='1.0.0'" badging.txt
