@@ -1,9 +1,9 @@
 {
-  "versionCode": 101,
-  "versionName": "1.0.1",
+  "versionCode": 102,
+  "versionName": "1.0.2",
   "packageName": "com.hongshu.assistant.local",
-  "apkUrl": "https://github.com/Goodnessy/hongshu-ota/releases/download/v1.0.1/hongshu-v1.0.1.apk",
-  "sha256": "622cf4760a6379f011b77fa18b02e49c613030095db332710665666c12b80c2d",
-  "sizeBytes": 99236,
-  "notes": "红薯助手 V1.0.1：首页空间优化、解析历史、本地缩略图与平台通用文案。"
+  "apkUrl": "https://github.com/Goodnessy/hongshu-ota/releases/download/v1.0.2/hongshu-v1.0.2.apk",
+  "sha256": "4cd7f60a1c94f3dc7598ab4ad4b27152e7ecfe2712f5d25aff0d3fc4cddd7c51",
+  "sizeBytes": 99736,
+  "notes": "红薯助手 V1.0.2：修复下载结果页按钮和进度显示，优化解析历史列表设计。"
 }
