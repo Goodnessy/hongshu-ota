@@ -1,9 +1,9 @@
 {
-  "versionCode": 100,
-  "versionName": "1.0.0",
+  "versionCode": 101,
+  "versionName": "1.0.1",
   "packageName": "com.hongshu.assistant.local",
-  "apkUrl": "https://github.com/Goodnessy/hongshu-ota/releases/download/v1.0.0/hongshu-v1.0.0.apk",
-  "sha256": "9544889ee13349431a809b71ec9622181733c93ebaf332b05edb5a68dc651fdf",
-  "sizeBytes": 84852,
-  "notes": "红薯助手 V1.0.0 正式版：沿用已验收功能，启用固定正式签名与整包 OTA 更新。"
+  "apkUrl": "https://github.com/Goodnessy/hongshu-ota/releases/download/v1.0.1/hongshu-v1.0.1.apk",
+  "sha256": "622cf4760a6379f011b77fa18b02e49c613030095db332710665666c12b80c2d",
+  "sizeBytes": 99236,
+  "notes": "红薯助手 V1.0.1：首页空间优化、解析历史、本地缩略图与平台通用文案。"
 }
