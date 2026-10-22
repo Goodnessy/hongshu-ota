@@ -19,17 +19,17 @@ jobs:
           python3 - <<'PY'
           import json
           m=json.load(open('stable.json'))
-          assert m['versionCode']==102 and m['versionName']=='1.0.2'
+          assert m['versionCode']==103 and m['versionName']=='1.0.3'
           assert m['packageName']=='com.hongshu.assistant.local'
-          assert m['apkUrl']=='https://github.com/Goodnessy/hongshu-ota/releases/download/v1.0.2/hongshu-v1.0.2.apk'
+          assert m['apkUrl']=='https://github.com/Goodnessy/hongshu-ota/releases/download/v1.0.3/hongshu-v1.0.3.apk'
           print(json.dumps(m,ensure_ascii=False,indent=2))
           PY
-          curl --retry 4 --retry-delay 5 --fail --location --max-time 180 https://github.com/Goodnessy/hongshu-ota/releases/download/v1.0.2/hongshu-v1.0.2.apk -o hongshu.apk
+          curl --retry 4 --retry-delay 5 --fail --location --max-time 180 https://github.com/Goodnessy/hongshu-ota/releases/download/v1.0.3/hongshu-v1.0.3.apk -o hongshu.apk
           python3 - <<'PY'
           import json,hashlib,pathlib,zipfile
           m=json.load(open('stable.json')); p=pathlib.Path('hongshu.apk')
           sha=hashlib.sha256(p.read_bytes()).hexdigest()
-          assert sha==m['sha256']=='4cd7f60a1c94f3dc7598ab4ad4b27152e7ecfe2712f5d25aff0d3fc4cddd7c51'
+          assert sha==m['sha256']=='9e4174a0d913113d0d0746deb3da06a733fc4171190211f4c214fab4f42e6886'
           assert p.stat().st_size==m['sizeBytes']
           with zipfile.ZipFile(p) as z: assert z.testzip() is None
           print('Anonymous full APK download, ZIP, size and SHA256 verified:',sha)
@@ -39,4 +39,4 @@ jobs:
           "$SIGNER" verify --verbose --print-certs hongshu.apk | tee certs.txt
           grep -qiF '089f5a037a6ff0a82560f55992ebaa14dd0e541f3d12bb0476e500f48e82f2a3' certs.txt
           "$AAPT" dump badging hongshu.apk > badging.txt
-          grep -F "name='com.hongshu.assistant.local' versionCode='102' versionName='1.0.2'" badging.txt
+          grep -F "name='com.hongshu.assistant.local' versionCode='103' versionName='1.0.3'" badging.txt
