@@ -1,0 +1,65 @@
+name: Publish verified Hongshu 1.0.3 OTA
+on:
+  push:
+    branches: [main]
+    paths: ['hongshu-v1.0.3.apk']
+permissions:
+  contents: write
+jobs:
+  publish:
+    if: github.repository == 'Goodnessy/hongshu-ota'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact signed APK
+        run: |
+          set -euo pipefail
+          FILE=hongshu-v1.0.3.apk
+          test -s "$FILE"
+          test "$(sha256sum "$FILE" | cut -d ' ' -f1)" = "9e4174a0d913113d0d0746deb3da06a733fc4171190211f4c214fab4f42e6886"
+          test "$(stat -c%s "$FILE")" = 100520
+          unzip -tq "$FILE" >/dev/null
+          SIGNER="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)"
+          AAPT="$(find "$ANDROID_HOME/build-tools" -name aapt -type f | sort -V | tail -n 1)"
+          "$SIGNER" verify --print-certs "$FILE" > cert.txt
+          grep -qiF 089f5a037a6ff0a82560f55992ebaa14dd0e541f3d12bb0476e500f48e82f2a3 cert.txt
+          "$AAPT" dump badging "$FILE" | grep -m1 "package: name='com.hongshu.assistant.local' versionCode='103' versionName='1.0.3'"
+      - name: Publish verified release asset and update public feed
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          FILE=hongshu-v1.0.3.apk
+          TAG=v1.0.3
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$TAG" "$FILE" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+              --title "红薯助手 V1.0.3" --notes "修复 Live 实况照片与动态文件配对，保留普通视频下载。"
+          fi
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets \
+            --jq '.assets[].name' | grep -Fx "$FILE"
+          python3 - <<'PY'
+          import json,pathlib,hashlib
+          p=pathlib.Path('hongshu-v1.0.3.apk')
+          info={
+            'versionCode':103,'versionName':'1.0.3',
+            'packageName':'com.hongshu.assistant.local',
+            'apkUrl':'https://github.com/Goodnessy/hongshu-ota/releases/download/v1.0.3/hongshu-v1.0.3.apk',
+            'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),
+            'sizeBytes':p.stat().st_size,
+            'notes':'红薯助手 V1.0.3：修复 Live 实况配对下载，支持不确定的单张 Live 同时保存图片与动态视频。'
+          }
+          pathlib.Path('/tmp/hongshu-stable.json').write_text(json.dumps(info,ensure_ascii=False,indent=2)+'\n','utf-8')
+          PY
+          sha=$(gh api "repos/$GITHUB_REPOSITORY/contents/stable.json?ref=main" --jq .sha)
+          encoded=$(base64 -w0 /tmp/hongshu-stable.json)
+          gh api -X PUT "repos/$GITHUB_REPOSITORY/contents/stable.json" \
+            -f "message=release: publish stable OTA v1.0.3" \
+            -f "content=$encoded" -f "sha=$sha" -f "branch=main" >/dev/null
+          for attempt in {1..8}; do
+            code=$(curl --retry 2 -fsSL "https://raw.githubusercontent.com/Goodnessy/hongshu-ota/main/stable.json" | python3 -c 'import json,sys;print(json.load(sys.stdin)["versionCode"])' || true)
+            [ "$code" = 103 ] && exit 0
+            sleep 5
+          done
+          echo "::error::Public manifest did not update" >&2
+          exit 1
