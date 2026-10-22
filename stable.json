@@ -1,9 +1,9 @@
 {
-  "versionCode": 102,
-  "versionName": "1.0.2",
+  "versionCode": 103,
+  "versionName": "1.0.3",
   "packageName": "com.hongshu.assistant.local",
-  "apkUrl": "https://github.com/Goodnessy/hongshu-ota/releases/download/v1.0.2/hongshu-v1.0.2.apk",
-  "sha256": "4cd7f60a1c94f3dc7598ab4ad4b27152e7ecfe2712f5d25aff0d3fc4cddd7c51",
-  "sizeBytes": 99736,
-  "notes": "红薯助手 V1.0.2：修复下载结果页按钮和进度显示，优化解析历史列表设计。"
+  "apkUrl": "https://github.com/Goodnessy/hongshu-ota/releases/download/v1.0.3/hongshu-v1.0.3.apk",
+  "sha256": "9e4174a0d913113d0d0746deb3da06a733fc4171190211f4c214fab4f42e6886",
+  "sizeBytes": 100520,
+  "notes": "红薯助手 V1.0.3：修复 Live 实况配对下载，支持不确定的单张 Live 同时保存图片与动态视频。"
 }
